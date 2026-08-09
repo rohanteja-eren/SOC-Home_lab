@@ -1,0 +1,69 @@
+RDP BRUTE-FORCE DETECTION: DETECTION SUMMARY
+=================================================
+
+1. RULE ID(S)
+-------------
+100100 (custom)
+100101 (custom)
+
+2. SEVERITY
+-----------
+Both rules: Level 15
+
+3. EXACT XML RULE
+------------------
+Rule 100100 (complete XML available):
+
+<group name="local">
+<rule id="100100" level="15">
+<if_sid>60204</if_sid>
+<description>Custom: RDP Brute Force Detected</description>
+</rule>
+</group>
+
+Rule 100101 (complete XML NOT included in the source report: only the
+following fields are documented):
+- ID: 100101
+- Level: 15
+- Description: Custom: Windows Brute Force (8 failed logons from same IP)
+- Groups: attack, bruteforce, authentication, local
+- Frequency: 8
+- Timeframe: 240 seconds
+- if_matched_group: authentication_failed
+- same_field: win.eventdata.ipAddress
+
+4. MITRE ATT&CK ID
+------------------
+T1110      - Brute Force (rules 100100 and 100101, per Wazuh rule metadata)
+T1110.001  - Password Guessing (fixed password list against single username)
+
+5. DETECTION PURPOSE
+---------------------
+Rule 100100: escalate the existing built-in "Multiple Windows Logon
+Failures" rule (60204) into an explicit, clearly labeled brute-force
+verdict.
+
+Rule 100101: independently correlate 8+ failed logons from the same
+source IP within a 240-second window into a brute-force verdict,
+regardless of which account(s) were targeted.
+
+6. IMPORTANT FIELDS
+--------------------
+- if_sid: 60204 (rule 100100)
+- if_matched_group: authentication_failed (rule 100101)
+- same_field: win.eventdata.ipAddress (rule 100101)
+- frequency: 8 / timeframe: 240s (rule 100101)
+- Event ID 4625 (An account failed to log on) underlies both rules
+
+7. RELATED BUILT-IN WAZUH RULES
+---------------------------------
+60122 - Logon Failure: Unknown user or bad password (level 5): fires
+        on every individual failed attempt.
+60204 - Multiple Windows Logon Failures (level 10): fires once the
+        failure count crosses Wazuh's built-in threshold; rule 100100
+        escalates directly on top of this rule via if_sid.
+
+NOTE: This is a PoC-level implementation. Rule 100101's IP-based
+correlation would not catch a distributed brute-force attack spread
+across many source IPs. The attack used a single known username; the
+rules were not tested against username-spraying variations.

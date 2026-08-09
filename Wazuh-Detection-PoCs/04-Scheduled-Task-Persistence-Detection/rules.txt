@@ -1,0 +1,55 @@
+WINDOWS SCHEDULED TASK PERSISTENCE DETECTION: DETECTION SUMMARY
+====================================================================
+
+1. RULE ID(S)
+-------------
+100230 (custom)
+
+2. SEVERITY
+-----------
+Level 13
+
+3. EXACT XML RULE
+------------------
+<rule id="100230" level="13">
+<if_group>sysmon_event1</if_group>
+<field name="win.eventdata.commandLine" type="pcre2">(?i)schtasks\s/create</field>
+<description>Windows Scheduled Task Persistence Detected</description>
+<mitre>
+<id>T1053.005</id>
+</mitre>
+</rule>
+
+4. MITRE ATT&CK ID
+------------------
+T1053.005 - Scheduled Task/Job: Scheduled Task
+
+5. DETECTION PURPOSE
+---------------------
+Detect scheduled-task-based persistence by matching the attacker's exact
+schtasks /create command in Sysmon process-creation command-line data,
+rather than relying on generic heuristics.
+
+6. IMPORTANT FIELDS
+--------------------
+- if_group: sysmon_event1 (Sysmon Event ID 1, process creation)
+- win.eventdata.commandLine (PCRE2 regex match: (?i)schtasks\s/create)
+
+7. RELATED BUILT-IN WAZUH RULES
+---------------------------------
+60228 - "A scheduled task was created" (Windows Event ID 4698): came
+        online as a secondary built-in signal after enabling the
+        relevant audit policy subcategory (Other Object Access Events).
+
+Unrelated built-in rules that fired alongside this attack (root-caused,
+NOT part of this detection):
+92021  - "PowerShell was used to delete files or directories" (level 3)
+        : fired on PowerShell's own startup temp-file cleanup.
+92213  - "Executable file dropped in folder commonly used by malware"
+         (level 15): fired on the same temp file being written to
+         AppData\Local\Temp.
+
+NOTE: This is a PoC-level implementation. The regex is scoped to the
+"schtasks /create" command string; other task-creation methods
+(COM API, PowerShell New-ScheduledTask, obfuscated invocations) would
+not be caught by this rule as written.

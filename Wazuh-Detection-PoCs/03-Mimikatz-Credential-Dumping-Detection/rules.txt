@@ -1,0 +1,69 @@
+MIMIKATZ CREDENTIAL DUMPING DETECTION: DETECTION SUMMARY
+=============================================================
+
+1. RULE ID(S)
+-------------
+100000, 100001, 100002 (custom, local_rules.xml)
+
+2. SEVERITY
+-----------
+All three rules: Level 12
+
+3. EXACT XML RULE
+------------------
+<group name="windows, sysmon, sysmon_process-anomalies,">
+
+<rule id="100000" level="12">
+<if_group>sysmon_event1</if_group>
+<field name="win.eventdata.image">mimikatz.exe</field>
+<description>Sysmon - Suspicious Process - mimikatz.exe</description>
+</rule>
+
+<rule id="100001" level="12">
+<if_group>sysmon_event8</if_group>
+<field name="win.eventdata.sourceImage">mimikatz.exe</field>
+<description>Sysmon - mimikatz.exe created a remote thread</description>
+</rule>
+
+<rule id="100002" level="12">
+<if_group>sysmon_event_10</if_group>
+<field name="win.eventdata.sourceImage">mimikatz.exe</field>
+<description>Sysmon - mimikatz.exe accessed $(win.eventdata.targetImage)</description>
+</rule>
+
+</group>
+
+4. MITRE ATT&CK ID
+------------------
+T1059.001  - Execution: PowerShell
+T1003.001  - Credential Access: LSASS Memory
+T1134      - Privilege Escalation: Access Token Manipulation
+T1027      - Defense Evasion: Obfuscated Files or Information
+T1082      - Discovery: System Information Discovery
+T1552.002  - Collection: Archive Collected Data
+
+5. DETECTION PURPOSE
+---------------------
+Detect Mimikatz credential-dumping activity via three angles: process
+creation (rule 100000), remote thread injection (rule 100001), and
+direct process access, Sysmon's Process Access event (rule 100002):
+the mechanism Mimikatz uses to reach into LSASS memory.
+
+6. IMPORTANT FIELDS
+--------------------
+- win.eventdata.image        (rule 100000, Sysmon Event ID 1)
+- win.eventdata.sourceImage  (rules 100001/100002, Sysmon Event IDs 8/10)
+- win.eventdata.targetImage  (rule 100002, referenced in description)
+- if_group: sysmon_event1 / sysmon_event8 / sysmon_event_10
+
+7. RELATED BUILT-IN WAZUH RULES
+---------------------------------
+None: no default Wazuh rule matched this behavior prior to writing
+these three custom rules; that gap is the reason the PoC exists.
+
+CAVEAT (documented directly in source report):
+These rules key off the literal filename "mimikatz.exe" in
+win.eventdata.image / win.eventdata.sourceImage. Renaming the binary
+means none of them fire. Not production-ready as-is: would need
+host/user exclusions for authorized testing or behavioral signals
+in addition to the filename match.

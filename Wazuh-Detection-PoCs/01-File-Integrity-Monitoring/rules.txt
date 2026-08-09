@@ -1,0 +1,60 @@
+FILE INTEGRITY MONITORING (FIM): DETECTION SUMMARY
+=====================================================
+
+1. RULE ID(S)
+-------------
+554  - File added (built-in Wazuh syscheck rule)
+553  - File deleted (built-in Wazuh syscheck rule)
+
+2. SEVERITY
+-----------
+Rule 554: Level 5
+
+3. RULE XML
+-----------
+Complete rule XML was not included in the source report: this PoC uses
+Wazuh's BUILT-IN syscheck rules (554, 553), not a custom-authored rule.
+
+The syscheck configuration that drives these built-in rules:
+
+<syscheck>
+<directories check_all="yes" report_changes="yes" realtime="yes">C:\Users\Public\Pictures</directories>
+<frequency>10</frequency>
+</syscheck>
+
+4. MITRE ATT&CK ID
+------------------
+T1565.001 - Stored Data Manipulation (directly auto-tagged by Wazuh during testing)
+
+Documented for context (not directly observed as auto-tagged):
+T1070.004 - Indicator Removal: File Deletion
+T1547.001 - Registry Run Keys / Startup Folder
+T1112     - Modify Registry
+T1036     - Masquerading
+
+5. DETECTION PURPOSE
+---------------------
+Detect unauthorized file creation, modification, deletion, and registry
+changes on a monitored Windows endpoint, with who-data attribution
+(responsible user + process) and content-level diffs where available.
+
+6. IMPORTANT FIELDS
+--------------------
+- rule.groups: "syscheck"
+- agent.name
+- syscheck.path
+- syscheck.event (added / modified / deleted)
+- syscheck.md5_before / syscheck.md5_after (and sha1/sha256 equivalents)
+- syscheck.diff (content diff, who-data mode)
+- syscheck.uname_after (who-data: responsible user)
+- syscheck.process_name (who-data: responsible process)
+
+7. RELATED BUILT-IN WAZUH RULES
+---------------------------------
+554 - File added
+553 - File deleted
+(Registry checksum-changed events use related syscheck rule IDs not
+individually enumerated in the source report.)
+
+NOTE: This is a PoC-level implementation using Wazuh's default syscheck
+rules and configuration. It is not a production-hardened detection.

@@ -1,0 +1,62 @@
+FIREWALL MANIPULATION DETECTION: DETECTION SUMMARY
+======================================================
+
+1. RULE ID(S)
+-------------
+100220 - Windows Firewall Rule Enumeration Detected (custom)
+92042  - netsh.exe execution (low-severity base event)
+92043  - netsh.exe execution adds a firewall rule (escalation)
+92044  - added rule references local port 5900 / VNC (escalation)
+
+2. SEVERITY
+-----------
+Rule 100220: Level 10
+Rules 92042 / 92043 / 92044: staged severity (base -> escalation -> escalation);
+exact per-rule levels not documented in the source report beyond
+92042 being described as "low-severity."
+
+3. RULE XML
+-----------
+Complete rule XML was not included in the source report.
+
+Documented trigger conditions:
+- 100220: fires when a process spawns netsh with "advfirewall firewall show"
+  arguments.
+- 92042: fires on netsh.exe execution generally.
+- 92043: fires when that netsh.exe execution adds a firewall rule.
+- 92044: fires when the added rule references local port 5900 (VNC).
+
+4. MITRE ATT&CK ID
+------------------
+T1070      - Indicator Removal (Avoid Logs stage)
+T1016      - System Network Configuration Discovery (Find Domain / List
+             Windows Firewall Rules stages)
+T1562.004  - Impair Defenses: Disable or Modify System Firewall
+             (Add/modify firewall rule stage)
+
+5. DETECTION PURPOSE
+---------------------
+Detect (a) firewall rule enumeration via netsh, used by attackers to map
+a host's exposed attack surface, and (b) firewall rule modification,
+specifically escalating when a newly added rule opens a port associated
+with known remote-access tooling (VNC / port 5900), while avoiding
+alerting on routine administrative firewall changes.
+
+6. IMPORTANT FIELDS
+--------------------
+- Parent process: cmd.exe
+- Child process: netsh.exe
+- Command line arguments: "advfirewall firewall show rule name=all"
+  (enumeration) / rule-add syntax referencing port 5900 (modification)
+- agent.id: 001
+
+7. RELATED BUILT-IN WAZUH RULES
+---------------------------------
+None documented as directly related/overlapping in the source report;
+prior to the custom rule, unrelated built-in rules fired nearby
+(dropped-executable and PowerShell-spawn alerts) but did not describe
+the enumeration activity itself.
+
+NOTE: This is a PoC-level implementation. The 92044 VNC-port escalation
+is narrow by design (port 5900 only) and would need broadening for
+production use against other remote-access tooling.
