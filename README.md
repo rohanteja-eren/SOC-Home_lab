@@ -14,7 +14,7 @@ Five detection engineering PoCs plus the base lab setup, ordered from lowest to 
 | [Firewall Manipulation Detection](Wazuh-Detection-PoCs/02-Firewall-Manipulation-Detection/README.md) | System Network Configuration Discovery / Impair Defenses | T1016 / T1562.004 | Level 10 |
 | [Mimikatz Credential Dumping Detection](Wazuh-Detection-PoCs/03-Mimikatz-Credential-Dumping-Detection/README.md) | LSASS Memory / PowerShell | T1003.001 / T1059.001 | Level 12 |
 | [Scheduled Task Persistence Detection](Wazuh-Detection-PoCs/04-Scheduled-Task-Persistence-Detection/README.md) | Scheduled Task/Job | T1053.005 | Level 13 |
-| [RDP Brute-Force Detection](Wazuh-Detection-PoCs/05-RDP-Bruteforce-Detection/README.md) | Brute Force | T1110 | Level 15 |
+| [RDP Brute-Force Detection](Wazuh-Detection-PoCs/05-RDP-Bruteforce-Detection/README.md) | Brute Force | T1110 | Level 10 |
 
 Each PoC folder has a full write-up, attack scenario, telemetry, detection logic, validation, troubleshooting, false-positive analysis, and limitations, plus the exact Wazuh rule implemented and the original source report.
 
